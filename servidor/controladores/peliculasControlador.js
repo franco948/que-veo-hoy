@@ -5,6 +5,34 @@ var con = require('../lib/conexionbd');
 function peliculas(req, res) {
     
     var sql = "SELECT * FROM pelicula";
+    var filtros = [];
+
+    var titulo = req.query.titulo;
+    var anio = req.query.anio;
+    var genero = req.query.genero;
+
+    if (titulo)
+    {
+        filtros.push("titulo LIKE '%" + titulo + "%'");
+    }
+    if (anio)
+    {
+        filtros.push('anio = ' + anio);
+    }
+    if (genero)
+    {
+        filtros.push('genero_id = ' + genero);
+    }
+
+    if (filtros.length > 0)
+    {
+        sql += " WHERE ";
+        filtros.forEach(filtro => sql += filtro + ' AND ');        
+
+        // Se remueve el ultimo AND concatenado
+        var lastIndex = sql.lastIndexOf('AND');
+        sql = sql.substring(0, lastIndex);
+    }
 
     //se ejecuta la consulta
     con.query(sql, function(error, resultado, fields) {
