@@ -87,7 +87,54 @@ function generos(req, res) {
     });
 }
 
+function buscarPelicula(req, res) {
+
+    var peliculaId = req.params.id;
+
+    var sqlPelicula = 
+        "SELECT *, genero.nombre as genero FROM pelicula " +
+        "JOIN genero ON genero.id = genero_id " +
+        "WHERE pelicula.id = " + peliculaId;
+    var sqlActores = 
+        "SELECT * FROM actor " + 
+        "JOIN actor_pelicula ON actor.id = actor_id " +
+        "WHERE pelicula_id = " + peliculaId;    
+
+    //se ejecuta la consulta
+    con.query(sqlPelicula, function(error, peliculas, fields) {
+        //si hubo un error, se informa y se envía un mensaje de error
+        if (error) {
+            console.log("Hubo un error en la consulta", error.message);
+            return res.status(404).send("Hubo un error en la consulta");
+        }        
+
+        //si no se encontró ningún resultado, se envía un mensaje con el error
+        if (peliculas.length == 0) {
+            console.log("No se encontro ninguna película con ese id");
+            return res.status(404).send("No se encontro ninguna película con ese id");
+        } 
+
+        con.query(sqlActores, function(error, actores, fields) {
+            //si hubo un error, se informa y se envía un mensaje de error
+            if (error) {
+                console.log("Hubo un error en la consulta", error.message);
+                return res.status(404).send("Hubo un error en la consulta");
+            }             
+
+            //si no hubo error, se crea el objeto respuesta con las canciones encontradas
+            var respuesta = {
+                'pelicula': peliculas[0],
+                'actores': actores
+            };
+
+            //se envía la respuesta
+            res.send(JSON.stringify(respuesta));
+        });        
+    });
+}
+
 module.exports = {
     peliculas: peliculas,
-    generos: generos
+    generos: generos,
+    buscarPelicula: buscarPelicula
 };
