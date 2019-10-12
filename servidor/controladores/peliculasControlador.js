@@ -11,6 +11,9 @@ function peliculas(req, res) {
     var anio = req.query.anio;
     var genero = req.query.genero;
 
+    var columnaOrden = req.query.columna_orden;
+    var tipoOrden = req.query.tipo_orden;
+
     if (titulo)
     {
         filtros.push("titulo LIKE '%" + titulo + "%'");
@@ -33,6 +36,8 @@ function peliculas(req, res) {
         var lastIndex = sql.lastIndexOf('AND');
         sql = sql.substring(0, lastIndex);
     }
+
+    sql += ' ORDER BY ' + columnaOrden + ' ' + tipoOrden;
 
     //se ejecuta la consulta
     con.query(sql, function(error, resultado, fields) {
