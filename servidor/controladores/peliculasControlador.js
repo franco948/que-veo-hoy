@@ -24,6 +24,29 @@ function peliculas(req, res) {
     });
 }
 
+function generos(req, res) {
+    
+    var sql = 'SELECT * FROM genero';
+
+    //se ejecuta la consulta
+    con.query(sql, function(error, resultado, fields) {
+        //si hubo un error, se informa y se envía un mensaje de error
+        if (error) {
+            console.log("Hubo un error en la consulta", error.message);
+            return res.status(404).send("Hubo un error en la consulta");
+        }
+
+        //si no hubo error, se crea el objeto respuesta con las canciones encontradas
+        var respuesta = {
+            'generos': resultado
+        };
+
+        //se envía la respuesta
+        res.send(JSON.stringify(respuesta));
+    });
+}
+
 module.exports = {
-    peliculas: peliculas
+    peliculas: peliculas,
+    generos: generos
 };
