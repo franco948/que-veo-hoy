@@ -5,14 +5,19 @@ var con = require('../lib/conexionbd');
 function peliculas(req, res) {
     
     var sql = "SELECT * FROM pelicula";
+    
     var filtros = [];
-
     var titulo = req.query.titulo;
     var anio = req.query.anio;
     var genero = req.query.genero;
 
     var columnaOrden = req.query.columna_orden;
     var tipoOrden = req.query.tipo_orden;
+
+    var pagina = req.query.pagina;
+    var cantidad = req.query.cantidad;
+    var inicio = (pagina - 1) * cantidad; 
+
 
     if (titulo)
     {
@@ -39,6 +44,8 @@ function peliculas(req, res) {
 
     sql += ' ORDER BY ' + columnaOrden + ' ' + tipoOrden;
 
+    // sql += ' LIMIT ' + inicio + ', ' + cantidad;
+
     //se ejecuta la consulta
     con.query(sql, function(error, resultado, fields) {
         //si hubo un error, se informa y se envía un mensaje de error
@@ -49,7 +56,8 @@ function peliculas(req, res) {
 
         //si no hubo error, se crea el objeto respuesta con las canciones encontradas
         var respuesta = {
-            'peliculas': resultado
+            'peliculas': resultado.slice(inicio, inicio + cantidad),
+            'total': resultado.length
         };
 
         //se envía la respuesta
