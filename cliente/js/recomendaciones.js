@@ -54,7 +54,7 @@ function ControladorRecomendaciones() {
         });
 
         $('.paso-2 select').change(function() {
-            self.genero = $(this).attr("genero");
+            self.genero = $(this).find('option:selected').attr('genero');
             self.pedirRecomendacion();
         });
 

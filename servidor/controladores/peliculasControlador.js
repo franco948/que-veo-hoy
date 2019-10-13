@@ -46,6 +46,8 @@ function peliculas(req, res) {
 
     // sql += ' LIMIT ' + inicio + ', ' + cantidad;
 
+    console.log(sql);
+
     //se ejecuta la consulta
     con.query(sql, function(error, resultado, fields) {
         //si hubo un error, se informa y se envía un mensaje de error
@@ -92,7 +94,7 @@ function buscarPelicula(req, res) {
     var peliculaId = req.params.id;
 
     var sqlPelicula = 
-        "SELECT *, genero.nombre as genero FROM pelicula " +
+        "SELECT * FROM pelicula " +
         "JOIN genero ON genero.id = genero_id " +
         "WHERE pelicula.id = " + peliculaId;
     var sqlActores = 
@@ -133,8 +135,64 @@ function buscarPelicula(req, res) {
     });
 }
 
+function recomendar(req, res) {
+    //se obtiene el path param id
+    var genero = req.query.genero;
+    var anioInicio = req.query.anio_inicio;
+    var anioFin = req.query.anio_fin;
+    var puntuacion = req.query.puntuacion;
+
+    var filtros = [];
+
+    //se crea la consulta que obtiene
+    var sql = 
+        "SELECT pelicula.id, titulo, trama, genero.nombre, poster FROM pelicula " +
+        "JOIN genero ON genero.id = genero_id";      
+
+    if (genero)
+    {
+        filtros.push("genero.nombre = '" + genero + "'");
+    }
+    if (anioInicio && anioFin)
+    {
+        filtros.push("anio BETWEEN '" + anioInicio + "' AND '" + anioFin + "'");
+    }    
+    if (puntuacion)
+    {
+        filtros.push("puntuacion >= " + puntuacion);
+    }
+
+    if (filtros.length > 0)
+    {
+        sql += " WHERE ";
+        filtros.forEach(filtro => sql += filtro + ' AND ');        
+
+        // Se remueve el ultimo AND concatenado
+        var lastIndex = sql.lastIndexOf('AND');
+        sql = sql.substring(0, lastIndex);
+    }
+
+    console.log(sql);
+
+    con.query(sql, function(error, resultado, fields) {
+        if (error) {
+            console.log("Hubo un error en la consulta", error.message);
+            return res.status(404).send("Hubo un error en la consulta");
+        }       
+        
+        var respuesta = {
+            //se crea el objeto respuesta con la canción encontrada
+            'peliculas': resultado
+        };
+
+        //se envía la respuesta
+        res.send(JSON.stringify(respuesta));
+    });
+}
+
 module.exports = {
     peliculas: peliculas,
     generos: generos,
-    buscarPelicula: buscarPelicula
+    buscarPelicula: buscarPelicula,
+    recomendar: recomendar
 };
